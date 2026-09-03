@@ -6,7 +6,7 @@ class MinimalSource(BaseModel):
     file_path: str
     first_character_index: int
     last_character_index: int
-    chunk: str
+    text: str
 
 class UnansweredQuestion(BaseModel):
     question_id: str = Field(default_factory=lambda:
