@@ -7,14 +7,15 @@ from pathlib import Path
 from tqdm import tqdm
 
 class Chunker():
-    def __init__(self) -> None:
+    def __init__(self, max_chunck_size) -> None:
+        self.chunck_size = max_chunck_size
         self.text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=2000,
+            chunk_size=self.chunck_size,
             chunk_overlap=200,
             add_start_index=True
         )
         self.python_splitter = RecursiveCharacterTextSplitter.from_language(
-            chunk_size=2000,
+            chunk_size=self.chunck_size,
             chunk_overlap=200,
             add_start_index=True,
             language=Language.PYTHON

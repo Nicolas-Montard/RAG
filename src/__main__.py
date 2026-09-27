@@ -1,7 +1,5 @@
-from .indexing.indexer import Indexer
-from .retrieval.retriever import Retriever
+from .cli import Cli
+import fire
 
 if __name__ == "__main__":
-    retriever = Retriever()
-    print(retriever.retrieve_best_chunk("how to configure an openai server", 5)[0].text)
-
+    fire.Fire(Cli)

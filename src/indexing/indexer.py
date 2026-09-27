@@ -6,8 +6,8 @@ from tqdm import tqdm
 from ..utils import Utils
 
 class Indexer(Utils):
-    def __init__(self) -> None:
-        self.chunker: Chunker = Chunker()
+    def __init__(self, max_chunck_size: int) -> None:
+        self.chunker: Chunker = Chunker(max_chunck_size)
         self.bm25: BM25Okapi | None = None
 
     def index(self):
