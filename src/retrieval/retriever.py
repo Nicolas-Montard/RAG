@@ -2,8 +2,10 @@ from pathlib import Path
 from rank_bm25 import BM25Okapi
 import pickle
 from ..utils import Utils
-from ..data_models import MinimalSource
+from ..data_models import MinimalSource, UnansweredQuestion, MinimalSearchResults
 import numpy as np
+import json
+
 
 class Retriever(Utils):
     def __init__(self) -> None:
@@ -23,4 +25,19 @@ class Retriever(Utils):
         top_score_index = np.argsort(scores)[::-1][:k]
 
         return [self.chunks[index] for index in top_score_index]
-        
+
+    def search_dataset(self, data_path: Path, k: int, save_dir: Path):
+        with open(data_path, "r") as file:
+            data = json.loads(file.read())
+        question_list: list[UnansweredQuestion] = []
+        for question in data:
+            question_list.append(UnansweredQuestion(**question))
+        search_results = []
+        for question in question_list:
+            minSearchResult = MinimalSearchResults(
+                **question.model_dump(),
+                retrieved_sources=self.retrieve_best_chunk(
+                    question.question, k))
+            search_results.append(minSearchResult)
+        with open(save_dir, "w") as file:
+            json.dump(search_results, file)
