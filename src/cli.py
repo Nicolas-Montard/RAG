@@ -35,7 +35,8 @@ class Cli():
         input_path = Path(dataset_path)
         try:
             retriever = Retriever()
-            retriever.search_dataset(input_path, k, output_dir)
-            print(f"search result saved in {output_dir}")
+            output_path = output_dir / "StudentSearchResults.json"
+            retriever.search_dataset(input_path, k, output_path)
+            print(f"search result saved in {output_path}")
         except Exception as e:
             print(f"cannot search dataset: {e}")

@@ -29,15 +29,20 @@ class Retriever(Utils):
     def search_dataset(self, data_path: Path, k: int, save_dir: Path):
         with open(data_path, "r") as file:
             data = json.loads(file.read())
-        question_list: list[UnansweredQuestion] = []
-        for question in data:
-            question_list.append(UnansweredQuestion(**question))
-        search_results = []
+
+        data = data["rag_questions"]
+
+        question_list: list[UnansweredQuestion] = [
+            UnansweredQuestion(**question) for question in data
+        ]
+
+        search_results: list[MinimalSearchResults] = []
         for question in question_list:
-            minSearchResult = MinimalSearchResults(
+            min_search_result = MinimalSearchResults(
                 **question.model_dump(),
-                retrieved_sources=self.retrieve_best_chunk(
-                    question.question, k))
-            search_results.append(minSearchResult)
+                retrieved_sources=self.retrieve_best_chunk(question.question, k),
+            )
+            search_results.append(min_search_result)
+
         with open(save_dir, "w") as file:
-            json.dump(search_results, file)
+            json.dump([r.model_dump() for r in search_results], file, indent=2)
