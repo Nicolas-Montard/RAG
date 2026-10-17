@@ -2,7 +2,7 @@ from pathlib import Path
 from rank_bm25 import BM25Okapi
 import pickle
 from ..utils import Utils
-from ..data_models import MinimalSource, UnansweredQuestion, MinimalSearchResults
+from ..data_models import MinimalSource, RagDataset, MinimalSearchResults, StudentSearchResults
 import numpy as np
 import json
 
@@ -27,22 +27,22 @@ class Retriever(Utils):
         return [self.chunks[index] for index in top_score_index]
 
     def search_dataset(self, data_path: Path, k: int, save_dir: Path):
-        with open(data_path, "r") as file:
-            data = json.loads(file.read())
-
-        data = data["rag_questions"]
-
-        question_list: list[UnansweredQuestion] = [
-            UnansweredQuestion(**question) for question in data
-        ]
+        dataset = RagDataset.model_validate_json(Path(data_path).read_text())
 
         search_results: list[MinimalSearchResults] = []
-        for question in question_list:
-            min_search_result = MinimalSearchResults(
-                **question.model_dump(),
-                retrieved_sources=self.retrieve_best_chunk(question.question, k),
+        for question in dataset.rag_questions:
+            search_results.append(
+                MinimalSearchResults(
+                    question_id=question.question_id,
+                    question=question.question,
+                    retrieved_sources=self.retrieve_best_chunk(question.question, k),
+                )
             )
-            search_results.append(min_search_result)
+
+        student_search_results = StudentSearchResults(
+            search_results= search_results,
+            k=k
+        )
 
         with open(save_dir, "w") as file:
-            json.dump([r.model_dump() for r in search_results], file, indent=2)
+            json.dump(student_search_results.model_dump(), file, indent=2)

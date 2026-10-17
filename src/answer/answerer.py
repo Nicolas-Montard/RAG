@@ -1,12 +1,22 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from ..data_models import MinimalSource
+from transformers import (
+    AutoTokenizer,
+    PreTrainedTokenizerBase,
+    Qwen3ForCausalLM,
+)
+from ..data_models import (MinimalSource,
+                           StudentSearchResults,
+                           StudentSearchResultsAndAnswer,
+                           MinimalAnswer)
 import torch
+from pathlib import Path
+import json
 
 class Answerer():
     def __init__(self) -> None:
         model_name = "Qwen/Qwen3-0.6B"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(
+        self.tokenizer: PreTrainedTokenizerBase =\
+            AutoTokenizer.from_pretrained(model_name)
+        self.model: Qwen3ForCausalLM = Qwen3ForCausalLM.from_pretrained(
             model_name,
             torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
             device_map="auto" if torch.cuda.is_available() else None,
@@ -24,24 +34,68 @@ class Answerer():
         "Answer:"
         )
 
-    def answer(self, question: str, sources: list[MinimalSource]):
+    def answer(self, question: str, sources: list[MinimalSource]) -> str:
         prompt = self._make_prompt(question, sources)
         messages = [{"role": "user", "content": prompt}]
 
-        inputs = self.tokenizer.apply_chat_template(
-        messages,
-        add_generation_prompt=True,
-        enable_thinking=False,
-        return_tensors="pt",
+        text = self.tokenizer.apply_chat_template(
+            messages,
+            add_generation_prompt=True,
+            enable_thinking=False,
+            tokenize=False,
+        )
+        if not isinstance(text, str):
+            raise TypeError(
+                "apply_chat_template should return a str with tokenize=False"
+            )
+        inputs = self.tokenizer(
+            text, return_tensors="pt",
+            add_special_tokens=False
         )
 
         outputs = self.model.generate( # type: ignore[attr-defined]
-        inputs,
+        **inputs,
         max_new_tokens=255,
         do_sample=False,
         )
 
-        generated_tokens = outputs[0][inputs.shape[-1]:]
-        return self.tokenizer.decode(
+        generated_tokens = outputs[0][inputs["input_ids"].shape[-1]:]
+        decoded = self.tokenizer.decode(
             generated_tokens,
-            skip_special_tokens=True)
+            skip_special_tokens=True,
+        )
+        if not isinstance(decoded, str):
+            raise TypeError("decode should return a str for a single sequence")
+        return decoded
+
+    def answer_dataset(
+        self,
+        student_search_result_path: str,
+        save_path: Path
+    ):
+        answerer = Answerer()
+        student_results = StudentSearchResults.model_validate_json(
+            Path(student_search_result_path).read_text()
+        )
+        
+        answers_result: list[MinimalAnswer] = []
+        for search_result in student_results.search_results:
+            print(f"question: {search_result.question}")
+            answer = answerer.answer(
+                search_result.question,
+                search_result.retrieved_sources
+            )
+            answers_result.append(
+                MinimalAnswer(
+                    **search_result.model_dump(),
+                    answer=answer
+                )
+            )
+            print(f"answer: {answer}\n")
+
+        search_result_and_answer = StudentSearchResultsAndAnswer(
+            search_results=answers_result,
+            k=student_results.k
+        )
+        with open(save_path, "w") as file:
+            json.dump(search_result_and_answer.model_dump(), file)
