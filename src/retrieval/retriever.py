@@ -5,6 +5,7 @@ from ..utils import Utils
 from ..data_models import MinimalSource, RagDataset, MinimalSearchResults, StudentSearchResults
 import numpy as np
 import json
+from tqdm import tqdm
 
 
 class Retriever(Utils):
@@ -30,7 +31,7 @@ class Retriever(Utils):
         dataset = RagDataset.model_validate_json(Path(data_path).read_text())
 
         search_results: list[MinimalSearchResults] = []
-        for question in dataset.rag_questions:
+        for question in tqdm(dataset.rag_questions, desc="search data"):
             search_results.append(
                 MinimalSearchResults(
                     question_id=question.question_id,

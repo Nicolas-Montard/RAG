@@ -10,6 +10,7 @@ from ..data_models import (MinimalSource,
 import torch
 from pathlib import Path
 import json
+from tqdm import tqdm
 
 class Answerer():
     def __init__(self) -> None:
@@ -51,7 +52,7 @@ class Answerer():
         inputs = self.tokenizer(
             text, return_tensors="pt",
             add_special_tokens=False
-        )
+        ).to(self.model.device)
 
         outputs = self.model.generate( # type: ignore[attr-defined]
         **inputs,
@@ -79,8 +80,7 @@ class Answerer():
         )
         
         answers_result: list[MinimalAnswer] = []
-        for search_result in student_results.search_results:
-            print(f"question: {search_result.question}")
+        for search_result in tqdm(student_results.search_results, desc="answering"):
             answer = answerer.answer(
                 search_result.question,
                 search_result.retrieved_sources
@@ -91,11 +91,10 @@ class Answerer():
                     answer=answer
                 )
             )
-            print(f"answer: {answer}\n")
 
         search_result_and_answer = StudentSearchResultsAndAnswer(
             search_results=answers_result,
             k=student_results.k
         )
         with open(save_path, "w") as file:
-            json.dump(search_result_and_answer.model_dump(), file)
+            json.dump(search_result_and_answer.model_dump(), file, indent=2)
