@@ -12,13 +12,15 @@ class Chunker():
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunck_size,
             chunk_overlap=200,
-            add_start_index=True
+            add_start_index=True,
+            strip_whitespace=False,
         )
         self.python_splitter = RecursiveCharacterTextSplitter.from_language(
             chunk_size=self.chunck_size,
             chunk_overlap=200,
             add_start_index=True,
-            language=Language.PYTHON
+            language=Language.PYTHON,
+            strip_whitespace=False,
         )
         headers_to_split_on = [
             ('#', 'headers 1'),
@@ -27,7 +29,7 @@ class Chunker():
         ]
         self.markdown_splitter = ExperimentalMarkdownSyntaxTextSplitter(
             headers_to_split_on=headers_to_split_on,
-            strip_headers=False
+            strip_headers=False,
         )
         self.sources: list[MinimalSource] = []
 

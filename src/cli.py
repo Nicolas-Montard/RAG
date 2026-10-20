@@ -1,12 +1,8 @@
 from .indexing.indexer import Indexer
 from .retrieval.retriever import Retriever
 from .answer.answerer import Answerer
-from .data_models import (MinimalSearchResults,
-                          StudentSearchResultsAndAnswer,
-                          MinimalAnswer,
-                          StudentSearchResults)
+from .evaluation.evaluator import Evaluator
 from pathlib import Path
-import json
 
 class Cli():
     def index(self, max_chunk_size: int = 2000):
@@ -51,7 +47,7 @@ class Cli():
             input_path = Path(dataset_path)
 
             retriever = Retriever()
-            output_path = output_dir / "StudentSearchResults.json"
+            output_path = output_dir / "student_search_results.json"
             retriever.search_dataset(input_path, k, output_path)
             print(f"search result saved in {output_path}")
         except Exception as e:
@@ -73,7 +69,7 @@ class Cli():
     def answer_dataset(
         self,
         student_search_result_path: str =\
-            "data/output/search_results/StudentSearchResults.json",
+            "data/output/search_results/student_search_results.json",
         save_directory: str = "data/output/answer_results"
     ):
         try:
@@ -81,7 +77,7 @@ class Cli():
             save_directory_path = Path(save_directory)
             save_directory_path.mkdir(parents=True, exist_ok=True)
             save_file_path = (
-                save_directory_path / "students_search_results_and_answer.json"
+                save_directory_path / "student_search_results_and_answer.json"
             )
 
             answerer.answer_dataset(
@@ -90,3 +86,13 @@ class Cli():
             print(f"answers saved in {save_file_path}")
         except Exception as e:
             print(f"cannot answer dataset: {e}")
+
+    def evaluate(
+        self,
+        student_search_results_path: str =\
+            "data/output/search_results/student_search_results.json",
+        dataset_path: str =\
+            "datasets_public/public/AnsweredQuestions/dataset_docs_public.json"
+    ):
+        evaluator = Evaluator()
+        evaluator.evaluate(student_search_results_path, dataset_path)
