@@ -19,22 +19,22 @@ class Evaluator():
                 json.loads(Path(dataset_path).read_text())["rag_questions"]
 
             k_arrays = self.get_k_array(student_results, dataset)
-            recall_1 = round(
-                sum(k_arrays["k_array_1"]) / len(k_arrays["k_array_1"]), 3)
-            recall_3 = round(
-                sum(k_arrays["k_array_3"]) / len(k_arrays["k_array_3"]), 3)
-            recall_5 = round(
-                sum(k_arrays["k_array_5"]) / len(k_arrays["k_array_5"]), 3)
-            recall_10 = round(
-                sum(k_arrays["k_array_10"]) / len(k_arrays["k_array_10"]), 3)
+            if not k_arrays["k_array_1"]:
+                print("cannot evaluate: no question to evaluate")
+                return
+            recall_1 = sum(k_arrays["k_array_1"]) / len(k_arrays["k_array_1"])
+            recall_3 = sum(k_arrays["k_array_3"]) / len(k_arrays["k_array_3"])
+            recall_5 = sum(k_arrays["k_array_5"]) / len(k_arrays["k_array_5"])
+            recall_10 =\
+                sum(k_arrays["k_array_10"]) / len(k_arrays["k_array_10"])
 
             print("Total number of question: "
                   f"{len(student_results.search_results)}\n")
             print("Evaluation results:\n")
-            print(f"Recall@1: {recall_1} ({recall_1 * 100}%)")
-            print(f"Recall@3: {recall_3} ({recall_3 * 100}%)")
-            print(f"Recall@5: {recall_5} ({recall_5 * 100}%)")
-            print(f"Recall@10: {recall_10} ({recall_10 * 100}%)")
+            print(f"Recall@1: {recall_1:.3f} ({recall_1 * 100:.1f}%)")
+            print(f"Recall@3: {recall_3:.3f} ({recall_3 * 100:.1f}%)")
+            print(f"Recall@5: {recall_5:.3f} ({recall_5 * 100:.1f}%)")
+            print(f"Recall@10: {recall_10:.3f} ({recall_10 * 100:.1f}%)")
         except Exception as e:
             print(f"cannot evaluate: {e}")
         
@@ -42,25 +42,21 @@ class Evaluator():
             self,
             stud_source: MinimalSource,
             valid_data: dict) -> float:
-        valid_source =\
-            next((sources for sources in valid_data["sources"]
-                    if sources["file_path"] == stud_source.file_path),
-                    None)
-            
-        if valid_source is None:
-            return 0
-
-        range_valid_source = (
-            valid_source["last_character_index"] -
-            valid_source["first_character_index"]
-        )
-        over_lap = (
-            max(valid_source["first_character_index"],
-                stud_source.first_character_index) -
-            min(valid_source["last_character_index"],
-                stud_source.last_character_index)
-        )
-        return over_lap / range_valid_source
+        best = 0.0
+        for valid in valid_data["sources"]:
+            if valid["file_path"] != stud_source.file_path:
+                continue
+            length = valid["last_character_index"] - valid["first_character_index"]
+            if length <= 0:
+                continue
+            overlap = (
+                min(valid["last_character_index"],
+                    stud_source.last_character_index)
+                - max(valid["first_character_index"],
+                    stud_source.first_character_index)
+            )
+            best = max(best, max(0, overlap) / length)
+        return best
 
     def get_k_array(
             self,
