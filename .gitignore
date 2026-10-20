@@ -1,4 +1,5 @@
 data/processed/*
 data/raw/*
+data/output/*
 .venv
 __pycache__
