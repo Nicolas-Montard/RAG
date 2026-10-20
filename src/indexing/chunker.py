@@ -11,13 +11,13 @@ class Chunker():
         self.chunck_size = max_chunck_size
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunck_size,
-            chunk_overlap=200,
+            chunk_overlap=100,
             add_start_index=True,
             strip_whitespace=False,
         )
         self.python_splitter = RecursiveCharacterTextSplitter.from_language(
             chunk_size=self.chunck_size,
-            chunk_overlap=200,
+            chunk_overlap=100,
             add_start_index=True,
             language=Language.PYTHON,
             strip_whitespace=False,
