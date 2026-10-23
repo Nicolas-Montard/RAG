@@ -1,13 +1,13 @@
-run:
+run: install
 	uv run -m src index
 
-search:
+search: install
 	uv run -m src search_dataset
 
-answer:
+answer: install
 	uv run -m src answer_dataset
 
-evaluate:
+evaluate: install
 	uv run -m src evaluate
 
 install:
