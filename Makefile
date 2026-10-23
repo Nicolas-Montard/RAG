@@ -7,7 +7,7 @@ search: install
 answer: install
 	uv run -m src answer_dataset
 
-evaluate:
+evaluate: install
 	uv run -m src evaluate
 
 install:
