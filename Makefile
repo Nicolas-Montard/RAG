@@ -1,5 +1,14 @@
 run:
-	uv run -m index
+	uv run -m src index
+
+search:
+	uv run -m src search_dataset
+
+answer:
+	uv run -m src answer_dataset
+
+evaluate:
+	uv run -m src evaluate
 
 install:
 	uv sync
