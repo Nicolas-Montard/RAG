@@ -3,3 +3,4 @@ data/raw/*
 data/output/*
 .venv
 __pycache__
+.mypy_cache
