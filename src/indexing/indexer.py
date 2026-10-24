@@ -40,7 +40,7 @@ class Indexer(Utils):
         if not self.chunker.sources:
             raise ValueError("No sources found to index.")
         tokenized_corpus = [
-            self.tokenize(source.text)
+            self.tokenize(f"{source.file_path} {source.text}")
             for source in tqdm(self.chunker.sources, desc="Tokenizing")
         ]
 

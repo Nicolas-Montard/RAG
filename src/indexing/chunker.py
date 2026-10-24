@@ -29,6 +29,8 @@ class Chunker():
         self.chunck_overlap = 100
         if max_chunck_size < 500:
             self.chunck_overlap = 0
+        if max_chunck_size > 1750:
+            max_chunck_size = 1750
         self.chunck_size = max_chunck_size
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=self.chunck_size,
