@@ -66,6 +66,12 @@ class Retriever(Utils):
             save_dir: Path of the output file (StudentSearchResults JSON).
         """
         dataset = RagDataset.model_validate_json(Path(data_path).read_text())
+        if "docs" in str(data_path):
+            output_path = save_dir / "student_search_results_docs.json"
+        elif "code" in str(data_path):
+            output_path = save_dir / "student_search_results_code.json"
+        else:
+            output_path = save_dir / "student_search_results.json"
 
         search_results: list[MinimalSearchResults] = []
         for question in tqdm(dataset.rag_questions, desc="search data"):
@@ -83,5 +89,5 @@ class Retriever(Utils):
             k=k,
         )
 
-        with open(save_dir, "w") as file:
+        with open(output_path, "w") as file:
             json.dump(student_search_results.model_dump(), file, indent=2)

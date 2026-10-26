@@ -16,7 +16,7 @@ DEFAULT_ANSWERED_PATH: str = (
     "datasets_public/public/AnsweredQuestions/dataset_docs_public.json"
 )
 DEFAULT_SEARCH_RESULTS_PATH: str = (
-    "data/output/search_results/student_search_results.json"
+    "data/output/search_results/student_search_results_docs.json"
 )
 
 
@@ -98,9 +98,8 @@ class Cli():
             input_path = Path(dataset_path)
 
             retriever = Retriever()
-            output_path = output_dir / "student_search_results.json"
-            retriever.search_dataset(input_path, k, output_path)
-            print(f"search result saved in {output_path}")
+            retriever.search_dataset(input_path, k, output_dir)
+            print(f"search result saved in {output_dir}")
         except Exception as e:
             print(f"cannot search dataset: {e}")
 
@@ -143,14 +142,11 @@ class Cli():
             answerer = Answerer()
             save_directory_path = Path(save_directory)
             save_directory_path.mkdir(parents=True, exist_ok=True)
-            save_file_path = (
-                save_directory_path / "student_search_results_and_answer.json"
-            )
 
             answerer.answer_dataset(
                 student_search_result_path,
-                save_file_path)
-            print(f"answers saved in {save_file_path}")
+                save_directory_path)
+            print(f"answers saved in {save_directory}")
         except Exception as e:
             print(f"cannot answer dataset: {e}")
 
