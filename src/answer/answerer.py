@@ -121,25 +121,22 @@ class Answerer():
 
     def answer_dataset(
             self,
-            student_search_result_path: str,
+            student_search_path: Path,
             save_dir: Path) -> None:
         """Answer every question of a search result file.
 
         Args:
-            student_search_result_path: Path of a StudentSearchResults JSON
+            student_search_path: Path of a StudentSearchResults JSON
                 file.
             save_path: Path of the output file
                 (StudentSearchResultsAndAnswer JSON).
         """
         student_results = StudentSearchResults.model_validate_json(
-            Path(student_search_result_path).read_text()
+            Path(student_search_path).read_text()
         )
-        if "docs" in student_search_result_path:
-            save_path = save_dir / "student_search_results_answer_docs.json"
-        elif "code" in student_search_result_path:
-            save_path = save_dir / "student_search_results_answer_code.json"
-        else:
-            save_path = save_dir / "student_search_results_answer.json"
+        save_path = Path(
+            f"{save_dir}/{student_search_path.stem}_and_answer"
+            f"{student_search_path.suffix}")        
 
         answers_result: list[MinimalAnswer] = []
         for search_result in tqdm(student_results.search_results,

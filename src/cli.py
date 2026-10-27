@@ -16,7 +16,7 @@ DEFAULT_ANSWERED_PATH: str = (
     "datasets_public/public/AnsweredQuestions/dataset_docs_public.json"
 )
 DEFAULT_SEARCH_RESULTS_PATH: str = (
-    "data/output/search_results/student_search_results_docs.json"
+    "data/output/search_results/dataset_docs_public_search.json"
 )
 
 
