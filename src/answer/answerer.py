@@ -136,7 +136,7 @@ class Answerer():
         )
         save_path = Path(
             f"{save_dir}/{student_search_path.stem}_and_answer"
-            f"{student_search_path.suffix}")        
+            f"{student_search_path.suffix}")
 
         answers_result: list[MinimalAnswer] = []
         for search_result in tqdm(student_results.search_results,

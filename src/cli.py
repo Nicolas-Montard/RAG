@@ -142,9 +142,10 @@ class Cli():
             answerer = Answerer()
             save_directory_path = Path(save_directory)
             save_directory_path.mkdir(parents=True, exist_ok=True)
+            student_search_path = Path(student_search_result_path)
 
             answerer.answer_dataset(
-                student_search_result_path,
+                student_search_path,
                 save_directory_path)
             print(f"answers saved in {save_directory}")
         except Exception as e:
